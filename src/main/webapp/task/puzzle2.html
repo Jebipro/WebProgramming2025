@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>4x4 퍼즐 게임</title>
+<style>
+body {
+    font-family: 'Arial';
+    text-align: center;
+    background: #f5f5f5;
+}
+#container {
+    display: table; /* grid 대신 table로 배치 */
+    margin: 20px auto;
+}
+.row {
+    display: table-row;
+}
+.piece {
+    display: table-cell;
+    width: 100px;
+    height: 100px;
+    background-size: 400px 400px;
+    border: 1px solid #ccc;
+    text-align: center;
+    vertical-align: middle;
+    cursor: move;
+}
+#controls {
+    margin-top: 15px;
+}
+#timer {
+    font-size: 20px;
+    color: #333;
+    margin-top: 10px;
+}
+</style>
+</head>
+<body>
+<h2>4x4 퍼즐 게임</h2>
+<div id="container"></div>
+
+<div id="controls">
+    <button id="generateBtn">퍼즐 생성</button>
+    <button id="checkBtn">정답 확인</button>
+    <div id="timer">남은 시간: 60초</div>
+</div>
+
+<script>
+// 상수로 선언: 재할당하지 않음
+const container = document.getElementById('container');
+const generateBtn = document.getElementById('generateBtn');
+const checkBtn = document.getElementById('checkBtn');
+const timerDisplay = document.getElementById('timer');
+const images = [
+    "img/puzzle1.jpg",
+    "img/puzzle2.jpg",
+    "img/puzzle3.jpg",
+    "img/puzzle4.jpg",
+    "img/puzzle5.jpg"
+];
+
+// 재할당 가능한 변수
+let pieces = [];
+let timer;
+let timeLeft = 60;
+let correctOrder = [];
+let selectedImage = "";
+let currentImageIndex = 0;
+let dragged = null;
+
+function startTimer() {
+    clearInterval(timer);
+    timeLeft = 60;
+    timerDisplay.innerHTML = "남은 시간: 60초";
+    timer = setInterval(function(){
+        timeLeft--;
+        timerDisplay.innerHTML = "남은 시간: " + timeLeft + "초";
+        if(timeLeft <= 0){
+            clearInterval(timer);
+            alert("시간 초과! 😢 다시 시도하세요.");
+        }
+    }, 1000);
+}
+
+function createPuzzle() {
+    container.innerHTML = "";
+    pieces = [];
+    correctOrder = [];
+
+    // 순서대로 이미지 선택
+    selectedImage = images[currentImageIndex];
+    currentImageIndex = (currentImageIndex + 1) % images.length;
+
+    // 4x4 테이블 형태로 조각 생성
+    for(let row=0; row<4; row++){
+        const tr = document.createElement("div");
+        tr.className = "row";
+        for(let col=0; col<4; col++){
+            const i = row*4 + col;
+            const td = document.createElement("div");
+            td.className = "piece";
+            td.style.backgroundImage = "url("+selectedImage+")";
+            td.style.backgroundPosition = (-col*100) + "px " + (-row*100) + "px";
+            td.setAttribute("data-index", i); // 원래 위치 저장
+            correctOrder.push(i);
+            tr.appendChild(td);
+            pieces.push(td);
+        }
+        container.appendChild(tr);
+    }
+
+    // 섞기 (배경 위치와 data-index 섞기)
+    for(let k=0; k<pieces.length; k++){
+        const swapIndex = Math.floor(Math.random()*pieces.length);
+        const tmpBg = pieces[k].style.backgroundPosition;
+        pieces[k].style.backgroundPosition = pieces[swapIndex].style.backgroundPosition;
+        pieces[swapIndex].style.backgroundPosition = tmpBg;
+
+        const tmpIndex = pieces[k].getAttribute("data-index");
+        pieces[k].setAttribute("data-index", pieces[swapIndex].getAttribute("data-index"));
+        pieces[swapIndex].setAttribute("data-index", tmpIndex);
+    }
+
+    addDragEvents();
+    startTimer();
+}
+
+function addDragEvents(){
+    for(let i=0; i<pieces.length; i++){
+        const piece = pieces[i];
+
+        piece.ondragstart = function(e){
+            dragged = this;
+        };
+        piece.ondragover = function(e){
+            e.preventDefault();
+        };
+        piece.ondrop = function(e){
+            e.preventDefault();
+            if(dragged === this) return;
+
+            // 배경 위치와 data-index 교환
+            const tmpBg = this.style.backgroundPosition;
+            this.style.backgroundPosition = dragged.style.backgroundPosition;
+            dragged.style.backgroundPosition = tmpBg;
+
+            const tmpIndex = this.getAttribute("data-index");
+            this.setAttribute("data-index", dragged.getAttribute("data-index"));
+            dragged.setAttribute("data-index", tmpIndex);
+        };
+    }
+}
+
+checkBtn.onclick = function(){
+    let correct = true;
+    for(let i=0; i<pieces.length; i++){
+        if(parseInt(pieces[i].getAttribute("data-index")) !== correctOrder[i]){
+            correct = false;
+            break;
+        }
+    }
+    if(correct){
+        clearInterval(timer);
+        alert("🎉 정답입니다! 축하해요!");
+    }else{
+        alert("❌ 아직 맞추지 못했어요!");
+    }
+};
+
+generateBtn.onclick = createPuzzle;
+</script>
+</body>
+</html>

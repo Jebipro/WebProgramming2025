@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>산수를 풀어 봅시다</title>
+<style>
+td {
+	padding-left: 10px;
+	padding-right: 10px;
+}
+</style>
+<script>
+function calc() {
+	let total = 0;
+	let questArray = document.getElementsByClassName("question");
+	let ansArray = document.getElementsByClassName("answer");
+	for(let i=0; i<questArray.length; i++) {
+		let question = questArray[i].innerHTML;
+		let corrAnswer = eval(question);
+		let userAnswer = ansArray[i].value;
+		if(userAnswer == "" || isNaN(userAnswer)) {
+			total += 0;
+			questArray[i].style.textDecoration = "line-through";
+		} else if(parseInt(userAnswer) == corrAnswer) {
+			total += 1;
+			questArray[i].style.textDecoration = "none";
+		} else {
+			total += 0;
+			questArray[i].style.textDecoration = "line-through";
+		}
+	}
+	document.getElementById("score").innerHTML = total;
+}
+
+function makeExp() {
+	let questArray = document.getElementsByClassName("question");
+	let ansArray = document.getElementsByClassName("answer");
+	for(let i=0; i<questArray.length; i++) {
+		let num1 = Math.floor(Math.random() * 20) + 1;
+		let num2 = Math.floor(Math.random() * 20) + 1;
+		let op = Math.floor(Math.random() * 4);
+		let operator = "+";
+		switch (op) {
+		case 0:
+			operator = "+";
+			break;
+		case 1:
+			operator = "-";
+			break;
+		case 2:
+			operator = "*";
+			break;
+		case 3:
+			operator = "/";
+			break;
+		}
+		questArray[i].innerHTML = num1 + operator + num2;
+		questArray[i].style.textDecoration = "none";
+		
+		ansArray[i].value = "";
+		document.getElementById("score").innerHTML = 0;
+	}
+}
+</script>
+</head>
+<body>
+<h3>산수 문제를 풀어 봅시다.</h3>
+자동으로 문제가 만들어줍니다. 답 입력 후 채점 버튼을 누르세요.
+다시 버튼을 누르면 새로운 문제가 출력됩니다. 나누기 결과는 정수입니다.
+<hr>
+<form>
+	<table>
+		<tr>
+			<td class="question">5*6</td>
+			<td><input class="answer" type="text" size="8"></td>
+		</tr>
+		<tr>
+			<td class="question">7+5*3</td>
+			<td><input class="answer" type="text" size="8"></td>
+		</tr>
+		<tr>
+			<td class="question">23*2</td>
+			<td><input class="answer" type="text" size="8"></td>
+		</tr>
+		<tr>
+			<td class="question">35-7</td>
+			<td><input class="answer" type="text" size="8"></td>
+		</tr>
+		<tr>
+			<td>
+				<button type="button" onclick="calc()">채점</button>
+			</td>
+			<td><span id="score">0</span>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+				<button type="button" onclick="makeExp()">다시</button>
+			</td>
+		</tr>
+	</table>
+</form>
+</body>
+</html>

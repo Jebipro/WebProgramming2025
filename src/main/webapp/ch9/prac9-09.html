@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>onmouseover과 onmouseout</title>
+<script>
+let text=["빨간자전거를 타고 서울, 대전, 대구, 부산 찍고, 목포, 인천을 거쳐 달린다",
+          "시집 10권, 한국 문학 60권, 에세이 20권, 외국 문학 10권 읽기",
+          "아침부터 수영연습, 점심 이후 사이클과 육상(달리기) 연습",
+          "웹프로그래밍 전공 책에 있는 실습 문제를 직접 풀어보면서 이해하기"];
+let commentDiv;
+
+function init() {
+	commentDiv = document.getElementById("commentDiv");	
+
+	let li = document.getElementsByTagName("li");
+	for(let i=0; i<li.length; i++) {
+		li[i].addEventListener("mouseover", over, false);
+		li[i].addEventListener("mouseout", hideCommentDiv, false);	
+	}
+}
+
+function over(e) {
+	let n=0;
+	switch(e.target.id) {
+		case "li0" : n = 0; break;
+		case "li1" : n = 1; break;
+		case "li2" : n = 2; break;
+		case "li3" : n = 3; break;
+	}
+	setCommentDiv(text[n], e);	
+}
+
+function setCommentDiv(comment, e) {
+	commentDiv.innerHTML = comment;
+	commentDiv.style.left = e.clientX + "px";
+	commentDiv.style.top = e.clientY + "px";
+	commentDiv.style.border = "1px solid yellow";
+	commentDiv.style.background = "pink";
+	commentDiv.style.visibility = "visible";
+	commentDiv.style.width = "250px";
+	commentDiv.style.height = "100px";
+}
+
+function hideCommentDiv() {
+	commentDiv.style.visibility = "hidden";
+}
+
+</script>
+</head>
+<body onload="init()">
+<h3>아이템에 마우스를 올리면 설명 출력</h3>
+<hr>
+<p>여름 방학 때 하고 싶은 것들</p>
+<ul>
+	<li id="li0">자전거로 대한민국 일주</li>
+	<li id="li1">책 100권 읽기</li>
+	<li id="li2">철인 3종 경기 준비</li>
+	<li id="li3">자바스크립트 정복</li>
+</ul> 
+<div id="commentDiv" style="position:absolute"></div>
+</body>
+</html>

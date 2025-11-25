@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>4x4 퍼즐 게임</title>
+<style>
+body {
+	font-family: 'Arial';
+	text-align: center;
+	background: #f5f5f5; /* 폰트는 Arial을 사용하고, 텍스트는 중앙배치, 배경색은 #f5f5f5로 지정 */
+}
+#container {
+	display: grid; /* 그리드 형식으로 생성한다 */
+	grid-template-columns: repeat(4, 100px); 
+	grid-template-rows: repeat(4, 100px); /* 그리드를 4x4형태로 나눈다 */
+	gap: 2px; /* 행과 열 사이의 간격을 2px로 지정 */
+	justify-content: center; /* 아이템들을 중앙에 정렬 */
+	margin: 20px auto; /* 여백은 상하20px, 좌우는 자동으로 균등하게 */
+	width: 404px;
+	height: 404px; /* 너비와 높이는 404px로 지정 */
+}
+.piece {
+	width: 100px; 
+	height: 100px; /* 너비와 높이를 100px로 지정 */
+	background-size: 400px 400px; /* 배경 크기를 400 x 400으로 지정 */
+	cursor: grab; /* 커서 모양을 grab으로 지정 */
+	border: 1px solid #ccc; /* 테두리를 1px 실선 #ccc로 지정 */
+}
+#controls {
+	margin-top: 15px; /* 여백 상단 15px */
+}
+#timer {
+	font-size: 20px;
+	color: #333; /* 폰트 크기 20px, 색상은 #333 */
+	margin-top : 10px; /* 여백 상단 10px */
+}
+</style>
+</head>
+<body>
+<h2>4x4 퍼즐 게임</h2>
+<!-- 퍼즐 조각이 들어갈 컨테이너 -->
+<div id="container"></div>
+<!-- 버튼과 타이머를 묶음 -->
+<div id="controls">
+	<button id="generateBtn">퍼즐 생성</button>
+	<button id="checkBtn">정답 확인</button>
+	<div id="timer">남은 시간: 60초</div>
+</div>
+
+<script>
+const container = document.getElementById('container');
+const generateBtn = document.getElementById('generateBtn');
+const checkBtn = document.getElementById('checkBtn');
+const timerDisplay = document.getElementById('timer'); // id 속성 값을 호출
+
+const images = [
+	"img/puzzle1.jpg",
+	"img/puzzle2.jpg",
+	"img/puzzle3.jpg",
+	"img/puzzle4.jpg",
+	"img/puzzle5.jpg" // jpg 파일 불러오기
+];
+
+let pieces = []; // 퍼즐 조각 배열
+let timer; // 타이머
+let timeLeft = 60; // 남은 시간 60초
+let correctOrder = []; // 정답 배열
+let selectedImage = ""; // 선택된 이미지
+let currentImageIndex = 0; // 순차적으로 돌릴 인덱스
+
+// 타이머 함수
+function startTimer() {
+	clearInterval(timer); // 이전 타이머 초기화 
+	timeLeft = 60;
+	timerDisplay.textContent = "남은 시간: 60초"; // 남은 시간 표시
+
+	timer = setInterval(() => {
+		timeLeft--; // 감소
+		timerDisplay.textContent = `남은 시간: ${timeLeft}초`; // 변수 값을 문자열 안에 삽입 (템플릿 리터럴)
+		if (timeLeft <= 0) {
+			clearInterval(timer);
+			alert("시간 초과! 😢 다시 시도하세요."); // 남은 시간이 0초가 되면 경고창을 띄우고, 타이머 종료
+		}
+	}, 1000); // 1초마다
+}
+
+// 퍼즐 생성 함수
+function createPuzzle() {
+	container.innerHTML = ""; // 기존 퍼즐을 초기화
+	pieces = [];
+	correctOrder = [];
+
+	// 순서대로 이미지 선택
+	selectedImage = images[currentImageIndex];
+	currentImageIndex = (currentImageIndex + 1) % images.length;
+
+	// 퍼즐 조각 만들기
+	for (let i = 0; i < 16; i++) { // 16개의 퍼즐 조각 생성
+		const piece = document.createElement("div"); // 새로운 html div 요소 생성
+		piece.classList.add("piece"); // div에 css 클래스 piece를 추가
+		piece.style.backgroundImage = `url(${selectedImage})`; // 각 조각의 배경 이미지를 선택된 퍼즐 이미지로 지정
+		const x = (i % 4) * -100; // 조각이 몇 번째 열(column)인지 계산
+		const y = Math.floor(i / 4) * -100; // 조각이 몇 번째 행(row)인지 계산, 각 조각 크기가 100px이므로 배경 이미지를 이동
+		piece.style.backgroundPosition = `${x}px ${y}px`; // 배경 이미지 위치를 조각에 맞게 설정
+		piece.dataset.index = i; // HTML5 dataset 속성을 사용하여 조각 원래 위치 저장
+		correctOrder.push(i); // correctOrder 배열에 조각 번호 추가
+		pieces.push(piece); // pieces 배열에 생성한 div 저장
+  	}
+
+	// 섞기
+	pieces.sort(() => Math.random() - 0.5); // 퍼즐 조각들을 무작위 순서로 섞어서 화면에 배치
+	pieces.forEach(p => container.appendChild(p)); // 배열을 섞어서 컨테이너에 추가
+
+	addDragEvents(); // 드래그 이벤트 등록
+	startTimer(); // 타이머 시작
+}
+
+// 드래그 이벤트
+function addDragEvents() {
+	let dragged = null; // dragged 변수 선언 후 초기값을 null로 설정
+
+	<!-- 퍼즐 조각 모든 div에 반복해서 이벤트 등록 -->
+	pieces.forEach(piece => {
+		piece.draggable = true; // 드래그 가능 여부 (true로 지정)
+
+		piece.addEventListener("dragstart", e => { // 사용자가 조각을 클릭하고 끌기 시작할 때 실행
+			dragged = piece; // 지금 드래그 중인 조각을 기억.
+			e.dataTransfer.effectAllowed = "move"; // 드래그 효과를 이동으로 지정
+			piece.style.opacity = "0.5"; // 반투명으로 만들어 드래그 중임을 시각적으로 표시
+		});
+
+		piece.addEventListener("dragend", e => { // 드래그가 끝나면 투명도를 원래대로 되돌림
+			piece.style.opacity = "1";
+		});
+		// 드래그한 요소가 다른 조각 위에 올라가 있을 때 필수 이벤트
+		piece.addEventListener("dragover", e => e.preventDefault()); // 브라우저 기본 동작 방지
+
+		piece.addEventListener("drop", e => { // 드래그한 조각을 다른 조각 위에 놓을 때 실행
+			e.preventDefault();
+			if (dragged === piece) return;
+
+			// 두 요소의 실제 위치를 교환 (DOM swap)
+			const draggedNext = dragged.nextSibling;
+			const pieceNext = piece.nextSibling; // drag와 drop된 두 조각의 nextSibling을 이용해 위치를 교환
+			const parent = piece.parentNode; // piece의 부모 요소를 가져옴(#container)
+
+			if (draggedNext === piece) { // 두 조각이 바로 붙어 있는 경우
+				parent.insertBefore(piece, dragged); // 순서 변경
+			} else if (pieceNext === dragged) { // 반대 순서인 경우
+				parent.insertBefore(dragged, piece); // 순서를 뒤집어도 되는 상황 처리
+			} else { // 일반적인 떨어진 경우
+				parent.insertBefore(dragged, pieceNext); // 먼저 드래그 조각을 드롭 대상 다음에 삽입
+				parent.insertBefore(piece, draggedNext); // 이후 드롭 대상 조각을 원래 드래그 조각 위치에 삽입
+			}
+
+			// pieces 배열도 교체
+			const draggedIndex = pieces.indexOf(dragged);
+			const targetIndex = pieces.indexOf(piece); // 화면에 보이는 DOM만 바뀌는 게 아니라 JS 배열도 교환
+			[pieces[draggedIndex], pieces[targetIndex]] = [pieces[targetIndex], pieces[draggedIndex]];
+		});
+	});
+}
+
+// 정답 체크
+checkBtn.addEventListener("click", () => {
+	const current = pieces.map(p => parseInt(p.dataset.index)); // 현재 퍼즐 조각의 순서 배열을 만듦
+	const isCorrect = current.every((v, i) => v === correctOrder[i]); // 현재 배열과 정답 배열을 비교 every() 배열의 모든 요소가 조건을 만족하는지 확인
+	if (isCorrect) {
+		clearInterval(timer);
+		alert("🎉 정답입니다! 축하해요!"); // 정답이면 시간 중지 후 정답 출력
+	} else {
+		alert("❌ 아직 맞추지 못했어요!"); // 오답이면 틀렸다는 문구 출력
+	}
+});
+// 버튼 클릭 이벤트
+generateBtn.addEventListener("click", createPuzzle); // 생성 버튼 클릭 시 퍼즐 생성
+</script>
+</body>
+</html>

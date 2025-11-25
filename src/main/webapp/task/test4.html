@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>구구단</title>
+</head>
+<body>
+<div id="output"></div>
+
+<script>
+const output = document.getElementById("output");
+let html = '';
+
+for (let i = 2; i <= 9; i++) {  // 단
+    html += `<h3>${i}단</h3>`;
+    for (let j = 1; j <= 9; j++) {  // 각 단의 곱
+        html += `${i}×${j}=${i * j}&nbsp;&nbsp;&nbsp;`;
+    }
+    html += '<br><br>';
+}
+
+output.innerHTML = html;
+</script>
+</body>
+</html>

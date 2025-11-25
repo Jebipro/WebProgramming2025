@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>짝수 갯수 구하기</title>
+</head>
+<body>
+<h3>Q. 0~20사이 값중 아래 제시한 값을 구하시오.</h3>
+<ol type="1">
+	<li>짝수의 갯수
+	<li>3의 배수 갯수
+	<li>5의 배수 합계
+	<li>총합계
+	<li>소수
+</ol>
+<hr>
+<script>
+	let evenCount=0;
+	let threeCount=0;
+	let fiveSum=0;
+	let totalSum=0;
+	let primeNum="";
+	
+	for (let i=0; i<=20; i++) {
+		totalSum += i; //총합계
+		
+		if (i % 2 == 0) {
+			evenCount++; //짝수의 갯수
+		}
+		if (i % 3 == 0) {
+			threeCount++; //3의 배수 갯수
+		}
+		if (i % 5 == 0) {
+			fiveSum += i; //5의 배수 합계
+		}
+		if (i > 1) {
+	        for (let j = 2; j <= i; j++) { //2중 for문 사용
+	          if (i % j == 0) {
+	            if (i == j) {
+	              primeNum += i + " "; //소수
+	            }
+	            break;
+	          }
+	        }
+		}
+	}
+	
+	document.write("1. 짝수의 갯수: " + evenCount + "<br>");
+	document.write("2. 3의 배수 갯수: " + threeCount + "<br>");
+	document.write("3. 5의 배수 합계: " + fiveSum + "<br>");
+	document.write("4. 총합계: " + totalSum + "<br>");
+	document.write("5. 소수: " + primeNum + "<br>");
+</script>
+</body>
+</html>
